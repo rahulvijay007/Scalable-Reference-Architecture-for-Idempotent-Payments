@@ -1,0 +1,21 @@
+{
+  "strategy": "redis-lock",
+  "concurrency": 10,
+  "mode": "identical",
+  "idempotencyKey": "4ecf7f55-4a70-4239-b5da-cbbfb32a88e6",
+  "timestamp": "2026-08-14T16:31:15.944Z",
+  "checks": {
+    "rate": 1,
+    "passes": 10,
+    "fails": 0
+  },
+  "http_req_duration": {
+    "med": 273.5258,
+    "max": 285.5038,
+    "p(90)": 278.47543,
+    "p(95)": 281.989615,
+    "avg": 255.22791999999998,
+    "min": 158.1704
+  },
+  "statusCounts": {}
+}

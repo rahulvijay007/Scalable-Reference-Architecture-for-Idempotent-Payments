@@ -1,0 +1,52 @@
+{
+  "strategy": "redis-lock",
+  "vus": 1,
+  "duration": "8s",
+  "timestamp": "2026-08-14T16:31:05.987Z",
+  "metrics": {
+    "authorize_latency_ms": {
+      "avg": 177.4375,
+      "min": 152,
+      "med": 170.5,
+      "max": 248,
+      "p(90)": 194.5,
+      "p(95)": 214.25
+    },
+    "capture_latency_ms": {
+      "med": 154.5,
+      "max": 185,
+      "p(90)": 171,
+      "p(95)": 175.25,
+      "avg": 157.125,
+      "min": 138
+    },
+    "refund_latency_ms": {
+      "avg": 169.5,
+      "min": 141,
+      "med": 172,
+      "max": 201,
+      "p(90)": 194,
+      "p(95)": 196.5
+    },
+    "http_req_duration": {
+      "avg": 167.2650125,
+      "min": 138.1875,
+      "med": 168.49095,
+      "max": 224.7321,
+      "p(90)": 188.56691,
+      "p(95)": 198.87022499999998
+    },
+    "http_reqs": {
+      "count": 48,
+      "rate": 5.94024308514247
+    },
+    "lifecycle_errors": {
+      "count": 0,
+      "rate": 0
+    },
+    "iterations": {
+      "count": 16,
+      "rate": 1.9800810283808232
+    }
+  }
+}

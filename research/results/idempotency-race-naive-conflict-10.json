@@ -1,0 +1,21 @@
+{
+  "strategy": "naive",
+  "concurrency": 10,
+  "mode": "conflict",
+  "idempotencyKey": "869cf1e3-9624-4b75-987a-b7d9fb7a6373",
+  "timestamp": "2026-08-14T16:30:47.881Z",
+  "checks": {
+    "rate": 0.1,
+    "passes": 1,
+    "fails": 9
+  },
+  "http_req_duration": {
+    "avg": 154.84616,
+    "min": 125.6733,
+    "med": 149.06085000000002,
+    "max": 253.9003,
+    "p(90)": 168.34179999999995,
+    "p(95)": 211.12104999999988
+  },
+  "statusCounts": {}
+}
