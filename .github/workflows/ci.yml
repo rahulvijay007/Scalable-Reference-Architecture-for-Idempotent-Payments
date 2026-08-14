@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: payment_platform_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/payment_platform_test
+      JWT_SECRET: ci-test-jwt-secret
+      JWT_REFRESH_SECRET: ci-test-jwt-refresh-secret
+      HMAC_SECRET: ci-test-hmac-secret
+      API_KEY_ENCRYPTION_KEY: '00000000000000000000000000000000'
+      CORS_ORIGIN: http://localhost:3000
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.14.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter @payment-platform/backend prisma:generate
+
+      - name: Run database migrations
+        run: pnpm --filter @payment-platform/backend exec prisma migrate deploy
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type-check
+        run: pnpm type-check
+
+      - name: Test shared package
+        run: pnpm --filter @payment-platform/shared test
+
+      - name: Test backend (unit)
+        run: pnpm --filter @payment-platform/backend test
+
+      - name: Seed database (for integration tests)
+        run: pnpm --filter @payment-platform/backend prisma:seed
+
+      - name: Test backend (integration)
+        run: pnpm --filter @payment-platform/backend test:integration
+
+      - name: Build all packages
+        run: pnpm build

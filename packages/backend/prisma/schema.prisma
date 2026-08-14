@@ -1,0 +1,308 @@
+// Prisma schema for Payment Processing Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      UserRole @default(MERCHANT)
+  isActive  Boolean  @default(true)
+
+  merchantId String?
+  merchant   Merchant? @relation(fields: [merchantId], references: [id])
+
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([merchantId])
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  MERCHANT
+  DEVELOPER
+  SUPPORT
+}
+
+// Refresh tokens for JWT auth
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// Merchant/Business account
+model Merchant {
+  id          String  @id @default(uuid())
+  name        String
+  email       String  @unique
+  description String?
+  website     String?
+  isActive    Boolean @default(true)
+
+  // Business details
+  businessName        String?
+  businessAddress     Json?
+  businessRegistration String?
+
+  users     User[]
+  payments  Payment[]
+  apiKeys   ApiKey[]
+  webhooks  Webhook[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@map("merchants")
+}
+
+// API Keys for programmatic access
+model ApiKey {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  keyHash     String   @unique
+  name        String
+  merchantId  String
+  merchant    Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+  permissions Json     @default("[]")
+  lastUsedAt  DateTime?
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([merchantId])
+  @@index([keyHash])
+  @@map("api_keys")
+}
+
+// Payment record
+model Payment {
+  id            String        @id @default(uuid())
+  merchantId    String
+  merchant      Merchant      @relation(fields: [merchantId], references: [id])
+
+  amount        Decimal       @db.Decimal(19, 4)
+  currency      Currency      @default(USD)
+  status        PaymentStatus @default(PENDING)
+  paymentMethod PaymentMethod
+
+  // Card details (encrypted)
+  cardLast4     String?
+  cardBrand     String?
+  cardExpMonth  Int?
+  cardExpYear   Int?
+
+  // Billing address
+  billingAddress Json?
+
+  // Idempotency
+  idempotencyKey String @unique
+
+  // Metadata
+  metadata      Json?
+
+  // Relationships
+  transactions  Transaction[]
+  webhookEvents WebhookEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([merchantId])
+  @@index([status])
+  @@index([idempotencyKey])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+  JPY
+  INR
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  DIGITAL_WALLET
+}
+
+// Transaction records (authorization, capture, refund, etc.)
+model Transaction {
+  id          String          @id @default(uuid())
+  paymentId   String
+  payment     Payment         @relation(fields: [paymentId], references: [id])
+
+  type        TransactionType
+  amount      Decimal         @db.Decimal(19, 4)
+  status      PaymentStatus
+
+  // Gateway response
+  gatewayTransactionId String?
+  gatewayResponse      Json?
+
+  // Error details
+  errorCode    String?
+  errorMessage String?
+
+  // Metadata
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([paymentId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+enum TransactionType {
+  AUTHORIZATION
+  CAPTURE
+  REFUND
+  REVERSAL
+}
+
+// Webhook configuration
+model Webhook {
+  id         String   @id @default(uuid())
+  merchantId String
+  merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+  url        String
+  secret     String
+  events     Json     @default("[]")
+  isActive   Boolean  @default(true)
+
+  metadata Json?
+
+  webhookDeliveries WebhookDelivery[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([merchantId])
+  @@map("webhooks")
+}
+
+// Webhook events
+model WebhookEvent {
+  id        String   @id @default(uuid())
+  paymentId String
+  payment   Payment  @relation(fields: [paymentId], references: [id])
+
+  eventType String
+  payload   Json
+
+  deliveries WebhookDelivery[]
+
+  createdAt DateTime @default(now())
+
+  @@index([paymentId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("webhook_events")
+}
+
+// Webhook delivery attempts
+model WebhookDelivery {
+  id              String       @id @default(uuid())
+  webhookId       String
+  webhook         Webhook      @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  webhookEventId  String
+  webhookEvent    WebhookEvent @relation(fields: [webhookEventId], references: [id])
+
+  status         WebhookStatus @default(PENDING)
+  attempts       Int           @default(0)
+  lastAttemptAt  DateTime?
+  nextRetryAt    DateTime?
+
+  responseStatus Int?
+  responseBody   String?
+  errorMessage   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([webhookId])
+  @@index([webhookEventId])
+  @@index([status])
+  @@index([nextRetryAt])
+  @@map("webhook_deliveries")
+}
+
+enum WebhookStatus {
+  PENDING
+  SENT
+  FAILED
+  RETRY
+}
+
+// Audit logs for compliance
+model AuditLog {
+  id     String @id @default(uuid())
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id])
+
+  action      String
+  resource    String
+  resourceId  String?
+
+  ipAddress   String?
+  userAgent   String?
+
+  details Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

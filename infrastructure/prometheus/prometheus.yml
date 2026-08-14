@@ -1,0 +1,30 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'payment-platform'
+
+scrape_configs:
+  # Backend API metrics
+  - job_name: 'payment-api'
+    static_configs:
+      - targets: ['host.docker.internal:3001']
+        labels:
+          service: 'backend-api'
+
+  # Worker service metrics
+  - job_name: 'payment-worker'
+    static_configs:
+      - targets: ['host.docker.internal:3003']
+        labels:
+          service: 'worker'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node exporter for system metrics (optional)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
