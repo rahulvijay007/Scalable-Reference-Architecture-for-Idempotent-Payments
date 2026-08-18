@@ -6,7 +6,7 @@ Compiled via live web research (not a static/memorized list) against these const
 
 ## How These Fit This Paper
 
-The underlying work — *"A Scalable Reference Architecture for Idempotent Payment Processing: Design, Security, and Observability in a Full-Stack Implementation"* — sits at the intersection of **distributed systems / concurrency correctness**, **software security**, and **fintech/payments**. Part 1 (conferences) is ordered by fit, then by how soon the opportunity is. **Parts 2 and 3 (journals) are ordered by confirmed turnaround speed (submission → first decision), fastest first** — since a fast venue with an imperfect scope fit is often still the better real-world choice than a slow one with a perfect fit; scope-fit notes are retained per row so that tradeoff is visible at a glance.
+The underlying work — *"A Scalable Reference Architecture for Idempotent Payment Processing: Design, Security, and Observability in a Full-Stack Implementation"* — sits at the intersection of **distributed systems / concurrency correctness**, **software security**, and **fintech/payments**. Part 1 (conferences) is ordered by fit, then by how soon the opportunity is. **Parts 2 and 3 (journals) are ordered by confirmed turnaround speed (submission → first decision), fastest first** — since a fast venue with an imperfect scope fit is often still the better real-world choice than a slow one with a perfect fit; scope-fit notes are retained per row so that tradeoff is visible at a glance. **Part 4 covers open access specifically via Dayananda Sagar University (DSU)** — researched separately since institutional open-access agreements are a different question from a venue's own scope/turnaround/cost.
 
 ---
 
@@ -67,6 +67,21 @@ All nine are **hybrid journals** (subscription or Springer/CSIR/DRDO "no charge"
 
 ---
 
+## Part 4 — Open Access via Dayananda Sagar University (DSU)
+
+Checked specifically: whether DSU has an institutional read-and-publish / transformative open-access agreement with Springer, Elsevier, Taylor & Francis, IEEE, or similar — the kind that would let a DSU-affiliated author publish open access on any of the venues above at no personal cost, the way many US/UK/EU universities do.
+
+**Finding: no such agreement is confirmed to exist, and one is very unlikely to exist, for two independent reasons found in this research pass:**
+
+1. **DSU's own library page** lists its subscribed e-resources as IEEE, ASME, J-Gate JET, and ASTM. These are **read-access subscriptions** (they let DSU members *read* those publishers' content) — nothing on the page indicates a *publishing*-side agreement (i.e., an APC waiver or discount for DSU authors *submitting* their own papers). No Springer, Elsevier, or Taylor & Francis open-access deal is listed at all.
+2. **India's national mechanism for this — "One Nation One Subscription" (ONOS)** — is explicitly restricted in its current phase to **government (Central and State) higher-education and R&D institutions only**. DSU is a private deemed university, and private institutions are explicitly excluded from ONOS Phase I (live now, since Jan 2025). A Phase II opening ONOS to private institutions has been publicly discussed for **2026–2027**, but is not yet implemented and DSU's specific participation is not confirmed even as a future plan.
+
+**Practical implication for this paper:** none of the journals in Part 2/3 above can be assumed to be free-open-access-via-DSU. The **₹0 figures already shown throughout Part 2/3 are the *subscription-route* (non-open-access) cost, which is unrelated to any institutional agreement** — that route is free at every one of those nine journals regardless of author affiliation, DSU included. If open-access publication specifically is wanted (rather than just a free-to-submit, standard-subscription publication), the APC figures already listed in Part 2/3 would apply in full, since no DSU discount reduces them.
+
+**Recommended next step, not yet completed in this research pass:** email DSU's library ("Library Facility Team," listed on [dsu.edu.in/our-team](https://www.dsu.edu.in/our-team)) directly and ask in writing whether any publisher OA agreement exists that isn't reflected on the public e-resources page — institutional agreements are occasionally live but not well-publicized. This document will be updated if that produces a different answer.
+
+---
+
 ## Recommendation
 
 Given the "near-term" constraint specifically:
@@ -107,4 +122,4 @@ Given the "near-term" constraint specifically:
 
 ## Sources
 
-Research was conducted via live web search against each venue's own site or a reputable aggregator (ACM/IEEE/Springer/Taylor & Francis official pages, conf.researchr.org, easychair.org CFP listings, Scopus/Scimago journal profiles, and — for turnaround figures specifically — Springer's own published journal statistics where surfaced, plus LetPub/SciRev community-reported figures where a journal doesn't publish an official metric, each labeled by which kind of source it is). No venue, date, URL, fee, or turnaround figure in this document was invented — where an exact figure could not be confirmed for the *current* edition or as an official statistic, that is stated explicitly (a prior-year reference, an imprecise community-reported range, or "not confirmed") rather than presented as more precise than it is. Turnaround times in particular fluctuate with a journal's current submission volume and reviewer availability far more than registration fees do — treat every figure here as directional, not a guarantee, and re-verify all dates, links, fees, and turnaround claims directly on each venue's official website before submitting or paying anything.
+Research was conducted via live web search against each venue's own site or a reputable aggregator (ACM/IEEE/Springer/Taylor & Francis official pages, conf.researchr.org, easychair.org CFP listings, Scopus/Scimago journal profiles, and — for turnaround figures specifically — Springer's own published journal statistics where surfaced, plus LetPub/SciRev community-reported figures where a journal doesn't publish an official metric, each labeled by which kind of source it is). Part 4 (DSU open access) was researched via DSU's own public library/e-resources/team pages and the official ONOS (onos.gov.in) FAQ and government press materials. No venue, date, URL, fee, turnaround figure, or institutional-agreement claim in this document was invented — where an exact figure or agreement could not be confirmed, that is stated explicitly (a prior-year reference, an imprecise community-reported range, "not confirmed," or "no such agreement found") rather than presented as more certain than it is. Turnaround times in particular fluctuate with a journal's current submission volume and reviewer availability far more than registration fees do — treat every figure here as directional, not a guarantee, and re-verify all dates, links, fees, turnaround claims, and the DSU open-access status directly with the relevant office before submitting or paying anything.
