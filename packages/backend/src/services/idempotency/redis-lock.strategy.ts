@@ -2,7 +2,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { config } from '../../config';
 import { AppError } from '../../middleware/error.middleware';
 import { acquireLock, releaseLock } from './redis-lock';
-import { IdempotencyStrategy, IdempotencyRunContext, IdempotencyStrategyResult } from './idempotency-strategy';
+import {
+  IdempotencyStrategy,
+  IdempotencyRunContext,
+  IdempotencyStrategyResult,
+} from './idempotency-strategy';
 
 const LOCK_ACQUIRE_ATTEMPTS = 3;
 const LOCK_ACQUIRE_RETRY_DELAY_MS = 100;
@@ -50,6 +54,16 @@ export class RedisLockStrategy implements IdempotencyStrategy {
       if (existing) {
         const { payment, transaction } = ctx.reconcile(existing);
         return { payment, transaction, isReplay: true };
+      }
+
+      // Synthetic, off-by-default (see config/index.ts) delay for
+      // fault-injection research only - simulates a critical section slow
+      // enough to outlive the lock's TTL, to empirically reproduce the
+      // weakness documented above rather than leaving it as prose-only.
+      if (config.idempotency.debugCriticalSectionDelayMs > 0) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, config.idempotency.debugCriticalSectionDelayMs)
+        );
       }
 
       const { payment, transaction } = await ctx.createPayment();

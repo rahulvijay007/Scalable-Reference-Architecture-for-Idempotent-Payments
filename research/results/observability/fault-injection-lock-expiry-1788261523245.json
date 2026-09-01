@@ -1,0 +1,149 @@
+{
+  "experiment": "redis-lock TTL-expiry fault injection",
+  "parameters": {
+    "concurrency": 20,
+    "gatewayLatencyMs": 1000,
+    "lockTtlVulnerableMs": 150,
+    "lockTtlControlMs": 5000,
+    "trialsPerCondition": 10
+  },
+  "vulnerable": {
+    "trials": 10,
+    "safetyViolations": 0,
+    "livenessViolations": 10,
+    "maxPaymentRowCount": 1,
+    "totalUnhandledResponses": 14,
+    "trialDetail": [
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 18,
+        "checksFailed": 2
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 19,
+        "checksFailed": 1
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 18,
+        "checksFailed": 2
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 19,
+        "checksFailed": 1
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 19,
+        "checksFailed": 1
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 18,
+        "checksFailed": 2
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 18,
+        "checksFailed": 2
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 19,
+        "checksFailed": 1
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 19,
+        "checksFailed": 1
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 19,
+        "checksFailed": 1
+      }
+    ]
+  },
+  "control": {
+    "trials": 10,
+    "safetyViolations": 0,
+    "livenessViolations": 0,
+    "maxPaymentRowCount": 1,
+    "totalUnhandledResponses": 0,
+    "trialDetail": [
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 20,
+        "checksFailed": 0
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 20,
+        "checksFailed": 0
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 20,
+        "checksFailed": 0
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 20,
+        "checksFailed": 0
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 20,
+        "checksFailed": 0
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 20,
+        "checksFailed": 0
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 20,
+        "checksFailed": 0
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 20,
+        "checksFailed": 0
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 20,
+        "checksFailed": 0
+      },
+      {
+        "paymentRowCount": 1,
+        "safetyHolds": true,
+        "checksPassed": 20,
+        "checksFailed": 0
+      }
+    ]
+  },
+  "timestamp": "2026-09-01T11:18:43.220Z"
+}

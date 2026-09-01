@@ -18,7 +18,9 @@
     "prisma:seed": "tsx prisma/seed.ts",
     "bench:run-all": "tsx scripts/run-all-benchmarks.ts",
     "bench:verify": "tsx scripts/verify-idempotency.ts",
-    "bench:fault-injection": "tsx scripts/fault-injection.ts"
+    "bench:fault-injection": "tsx scripts/fault-injection.ts",
+    "bench:fault-injection-lock-expiry": "tsx scripts/fault-injection-lock-expiry.ts",
+    "bench:scaled": "tsx scripts/run-scaled-benchmarks.ts"
   },
   "dependencies": {
     "@payment-platform/shared": "workspace:*",

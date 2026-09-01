@@ -11,7 +11,8 @@ export const config = {
 
   // Database
   database: {
-    url: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/payment_platform',
+    url:
+      process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/payment_platform',
   },
 
   // Redis
@@ -77,7 +78,23 @@ export const config = {
   // 'redis-lock' exist for the empirical benchmark comparison in
   // research/benchmarks - never set 'naive' outside of that benchmark.
   idempotency: {
-    strategy: (process.env.IDEMPOTENCY_STRATEGY || 'optimistic') as 'naive' | 'optimistic' | 'redis-lock',
+    strategy: (process.env.IDEMPOTENCY_STRATEGY || 'optimistic') as
+      | 'naive'
+      | 'optimistic'
+      | 'redis-lock',
     lockTtlMs: parseInt(process.env.IDEMPOTENCY_LOCK_TTL_MS || '5000', 10),
+    // Synthetic delay injected inside RedisLockStrategy's critical section,
+    // AFTER the lock is acquired and BEFORE it is released. Defaults to 0
+    // (no effect whatsoever in production or any other benchmark). Exists
+    // solely so research/results/observability/fault-injection-lock-expiry-*
+    // can empirically reproduce the TTL-expiry liveness weakness documented
+    // in research/formal-model/idempotency-protocol.md §4 - see
+    // scripts/fault-injection-lock-expiry.ts and REPRODUCE.md for why a
+    // synthetic delay is necessary rather than MOCK_GATEWAY_LATENCY_MS
+    // alone (the gateway call happens outside the lock's critical section).
+    debugCriticalSectionDelayMs: parseInt(
+      process.env.IDEMPOTENCY_DEBUG_CRITICAL_SECTION_DELAY_MS || '0',
+      10
+    ),
   },
 };

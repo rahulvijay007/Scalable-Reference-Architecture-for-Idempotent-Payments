@@ -82,10 +82,39 @@ pnpm bench:run-all                 # full concurrency/duration matrix (slower - 
 `--strategies=optimistic,naive,redis-lock` (any subset, comma-separated) limits which strategies run - useful for retrying just one after an interruption. Each strategy run: spawns the backend with `IDEMPOTENCY_STRATEGY=<strategy>` and `MOCK_GATEWAY_SUCCESS_RATE=1` (deterministic gateway) and `RATE_LIMIT_MAX_REQUESTS` raised (the production rate limiter is a separate concern from the protocol under test and would otherwise contaminate sustained load results), logs in once and reuses that token across every k6 invocation (the stricter 5-attempts/15-min auth rate limiter would otherwise trip partway through a single strategy's run), runs the k6 scripts, verifies idempotency-race correctness directly against Postgres, then tears the backend down before the next strategy.
 
 Individual k6 scripts can also be run directly against an already-running backend:
+
 ```bash
 cd research/benchmarks/k6
 k6 run --env BASE_URL=http://localhost:3001 --env STRATEGY=optimistic --env VUS=10 --env DURATION=15s throughput-latency.js
 ```
+
+### 5a. Statistical-rigor scaled benchmark (`research/results/scaled/`)
+
+Higher-concurrency throughput/latency sweep for the `optimistic` strategy,
+repeated 5 times per tier so results are reported as mean ± stddev rather
+than a single point estimate:
+
+```bash
+cd packages/backend
+pnpm bench:scaled -- --vus=1,10,50,100,250 --repeats=5 --duration=15s
+```
+
+See `research/results/scaled/README.md` for the recorded result and its
+interpretation (including the honestly-reported throughput ceiling at high
+concurrency on this single-process reference deployment).
+
+### 5b. Redis-lock TTL-expiry fault injection (`research/results/observability/fault-injection-lock-expiry-*.json`)
+
+Empirically reproduces the conditional-liveness weakness documented in
+`research/formal-model/idempotency-protocol.md` §4:
+
+```bash
+cd packages/backend
+pnpm bench:fault-injection-lock-expiry -- --concurrency=20 --latency=1000 --ttl-vulnerable=150 --ttl-control=5000 --trials=10
+```
+
+See `research/results/README.md` ("Redis-lock TTL-expiry fault injection")
+for the recorded result and interpretation.
 
 ## 6. Regenerate the observability demonstration (`research/results/observability/`)
 
@@ -100,16 +129,16 @@ View the resulting dashboard live at `http://localhost:3002` (admin/admin) → "
 
 ## 7. Where everything lands
 
-| What | Where |
-|---|---|
-| Formal correctness argument (prose) | `research/formal-model/idempotency-protocol.md` |
-| Formal correctness argument (theorems + machine-checked TLA+ model) | `research/formal-model/formal-proof.md`, `research/formal-model/tla/` |
-| Formal state machine | `research/formal-model/payment-state-machine.md` |
-| Threat model | `research/security/threat-model.md` |
-| Benchmark scripts | `research/benchmarks/k6/*.js` |
-| Orchestration/verification scripts | `packages/backend/scripts/{run-all-benchmarks,verify-idempotency,fault-injection}.ts` |
-| Raw results | `research/results/*.json`, `research/results/observability/*.json` |
-| Bibliography | `research/related-work.md` |
+| What                                                                | Where                                                                                                |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Formal correctness argument (prose)                                 | `research/formal-model/idempotency-protocol.md`                                                      |
+| Formal correctness argument (theorems + machine-checked TLA+ model) | `research/formal-model/formal-proof.md`, `research/formal-model/tla/`                                |
+| Formal state machine                                                | `research/formal-model/payment-state-machine.md`                                                     |
+| Threat model                                                        | `research/security/threat-model.md`                                                                  |
+| Benchmark scripts                                                   | `research/benchmarks/k6/*.js`                                                                        |
+| Orchestration/verification scripts                                  | `packages/backend/scripts/{run-all-benchmarks,verify-idempotency,fault-injection}.ts`                |
+| Raw results                                                         | `research/results/*.json`, `research/results/observability/*.json`, `research/results/scaled/*.json` |
+| Bibliography                                                        | `research/related-work.md`                                                                           |
 
 ## Known deviations from a fully mechanical script-only pipeline
 

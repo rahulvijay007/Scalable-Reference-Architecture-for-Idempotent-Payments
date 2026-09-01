@@ -1,0 +1,52 @@
+{
+  "strategy": "optimistic",
+  "vus": 50,
+  "duration": "15s",
+  "timestamp": "2026-09-01T11:24:07.747Z",
+  "metrics": {
+    "authorize_latency_ms": {
+      "avg": 405.0520984081042,
+      "min": 206,
+      "med": 409,
+      "max": 630,
+      "p(90)": 497,
+      "p(95)": 529
+    },
+    "capture_latency_ms": {
+      "max": 508,
+      "p(90)": 405,
+      "p(95)": 421,
+      "avg": 342.4978292329957,
+      "min": 198,
+      "med": 345
+    },
+    "refund_latency_ms": {
+      "p(90)": 451,
+      "p(95)": 473,
+      "avg": 369.61649782923297,
+      "min": 216,
+      "med": 373,
+      "max": 541
+    },
+    "http_req_duration": {
+      "min": 198.0973,
+      "med": 369.6811,
+      "max": 630.036,
+      "p(90)": 456.51956,
+      "p(95)": 483.7615599999999,
+      "avg": 371.3290295706701
+    },
+    "http_reqs": {
+      "count": 2073,
+      "rate": 131.82964191469856
+    },
+    "lifecycle_errors": {
+      "count": 0,
+      "rate": 0
+    },
+    "iterations": {
+      "count": 691,
+      "rate": 43.94321397156619
+    }
+  }
+}

@@ -28,8 +28,8 @@ return payment
 ```
 
 `Payment.idempotencyKey` carries a database-level `UNIQUE` constraint, so a
-truly duplicate row can never physically exist — but the *read* and the
-*write* above are two separate round trips, not one atomic operation. Given
+truly duplicate row can never physically exist — but the _read_ and the
+_write_ above are two separate round trips, not one atomic operation. Given
 two concurrent requests `R1`, `R2` with the same key `k`:
 
 1. `R1` executes `SELECT ... WHERE idempotencyKey = k` → no row found.
@@ -110,6 +110,7 @@ is belt-and-suspenders on top of the database constraint, which still holds
 independently).
 
 **Liveness — conditional.** Liveness holds only if:
+
 1. Redis itself is available (an outage causes every request to fail with
    `423 LOCKED` after `LOCK_ACQUIRE_ATTEMPTS` retries — the protocol
    **fails closed**, unlike optimistic-retry which has no such dependency).
@@ -121,7 +122,7 @@ independently).
    close, just with a much smaller and less deterministic window than the
    naive protocol's.
 3. A holder that crashes mid-section does not release the lock explicitly;
-   the TTL is the *only* mechanism that frees it for other callers. This is
+   the TTL is the _only_ mechanism that frees it for other callers. This is
    a standard, accepted property of single-instance lease-based locks and is
    why the release script only ever deletes a lock it still owns (comparing
    the stored token) — it must never release a lock that TTL-expired and was
@@ -131,17 +132,24 @@ This is a single-Redis-instance design; it does not attempt the multi-node
 Redlock protocol (or its published critiques) since this system has exactly
 one Redis instance and that broader treatment is out of scope here.
 
+Point 2 above is not merely a theoretical concern: `research/results/README.md`
+("Redis-lock TTL-expiry fault injection") reports a repeated-trial
+experiment that reproduces it directly — with the lock's critical section
+forced to outlive its TTL, liveness failed in 10/10 trials (14 unhandled
+responses across 200 requests), while safety held in all of them, matching
+this section's prediction exactly.
+
 **Cost.** Every request pays for a lock acquisition and release round trip
 to Redis (two extra network hops beyond the DB work), plus a new
 infrastructure dependency in the request's critical path.
 
 ## 5. Comparison summary
 
-| Strategy       | Safety | Liveness                             | Extra infra | Added latency source        | Failure mode under Redis outage |
-|-----------------|:------:|----------------------------------------|:------------:|------------------------------|----------------------------------|
-| Naive           | ✅     | ❌ (unhandled 500 on contention)       | none         | none                          | n/a (doesn't use Redis)          |
-| Optimistic-retry| ✅     | ✅ (unconditional)                     | none         | 1 extra SELECT, only on conflict | n/a (doesn't use Redis)     |
-| Redis-lock      | ✅     | ✅ *iff* TTL ≫ critical-section time and Redis is up | Redis  | lock acquire+release round trips, every request | fails closed (423) |
+| Strategy         | Safety | Liveness                                             | Extra infra | Added latency source                            | Failure mode under Redis outage |
+| ---------------- | :----: | ---------------------------------------------------- | :---------: | ----------------------------------------------- | ------------------------------- |
+| Naive            |   ✅   | ❌ (unhandled 500 on contention)                     |    none     | none                                            | n/a (doesn't use Redis)         |
+| Optimistic-retry |   ✅   | ✅ (unconditional)                                   |    none     | 1 extra SELECT, only on conflict                | n/a (doesn't use Redis)         |
+| Redis-lock       |   ✅   | ✅ _iff_ TTL ≫ critical-section time and Redis is up |    Redis    | lock acquire+release round trips, every request | fails closed (423)              |
 
 **Conclusion**: optimistic-retry provides the same safety as the lock-based
 alternative, strictly stronger unconditional liveness than both alternatives,
@@ -156,7 +164,7 @@ concurrent load.
 ## 6. A refinement found by property-based testing
 
 The initial implementation of §3 created the `Payment` row first and only
-created its `Transaction` row later, *after* the gateway call. Property-based
+created its `Transaction` row later, _after_ the gateway call. Property-based
 testing (`payment.state-machine.pbt.test.ts`) surfaced a residual race this
 introduces: a losing caller that reconciles against the winner's `Payment`
 row immediately after the P2002 catch can observe that row before the
@@ -197,7 +205,7 @@ just its results.
   idempotent — a retried gateway call after a successful authorization would
   create a second gateway-side charge in a real (non-mock) integration. This
   protocol only guarantees idempotency at the `Payment` row level, i.e., it
-  guarantees the *gateway is called at most once per idempotency key* by
+  guarantees the _gateway is called at most once per idempotency key_ by
   construction (the gateway call happens only after the strategy has
   established a uniquely-created row), which is the property that matters —
   but this is worth stating explicitly rather than leaving implicit.
