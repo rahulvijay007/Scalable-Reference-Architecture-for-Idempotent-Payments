@@ -12,6 +12,7 @@ Exact steps to regenerate every number and file referenced in
   - macOS: `brew install k6`
   - Linux: see https://k6.io/docs/get-started/installation/
   - If `k6` isn't on `PATH` after install, set `K6_BIN` to the full executable path before running the scripts below (`packages/backend/scripts/run-all-benchmarks.ts` and `fault-injection.ts` both check `K6_BIN` first, then common Windows install paths, then fall back to `PATH`).
+- Java 11+ (only for the TLA+ model check in step 4a) — verify with `java -version`.
 
 ## 2. Environment setup
 
@@ -47,6 +48,29 @@ pnpm --filter @payment-platform/backend test:integration   # includes security.a
 
 The property-based test's `Idempotency invariant under concurrency` block (in `payment.state-machine.pbt.test.ts`) is the fastest way to see the safety/liveness distinction between strategies without needing k6 or a live server - it runs the same three strategies against an in-memory fake store.
 
+## 4a. Machine-check the formal model (TLA+, no other infra needed)
+
+```bash
+cd research/formal-model/tla
+curl -sL -o tla2tools.jar https://github.com/tlaplus/tlaplus/releases/latest/download/tla2tools.jar
+
+# Naive strategy - TLC is expected to find a violation (this is the bug, restated formally)
+java -jar tla2tools.jar -config IdempotentPayment_Naive.cfg IdempotentPayment.tla
+
+# Optimistic strategy - TLC is expected to report "No error has been found"
+java -jar tla2tools.jar -config IdempotentPayment_Optimistic.cfg IdempotentPayment.tla
+
+# Optimistic strategy, exhaustively re-checked at 5 concurrent requesters (3,157 states)
+java -jar tla2tools.jar -config IdempotentPayment_Optimistic_N5.cfg IdempotentPayment.tla
+```
+
+Recorded output from an actual run of all three is checked in at
+`tlc-output-naive.txt`, `tlc-output-optimistic.txt`, and
+`tlc-output-optimistic-n5.txt` in the same directory — the theorems in
+`research/formal-model/formal-proof.md` cite these transcripts directly, so
+re-running the commands above is a genuine independent verification, not a
+demonstration of something already taken on faith.
+
 ## 5. Regenerate the benchmark results (`research/results/`)
 
 ```bash
@@ -78,7 +102,8 @@ View the resulting dashboard live at `http://localhost:3002` (admin/admin) → "
 
 | What | Where |
 |---|---|
-| Formal correctness argument | `research/formal-model/idempotency-protocol.md` |
+| Formal correctness argument (prose) | `research/formal-model/idempotency-protocol.md` |
+| Formal correctness argument (theorems + machine-checked TLA+ model) | `research/formal-model/formal-proof.md`, `research/formal-model/tla/` |
 | Formal state machine | `research/formal-model/payment-state-machine.md` |
 | Threat model | `research/security/threat-model.md` |
 | Benchmark scripts | `research/benchmarks/k6/*.js` |

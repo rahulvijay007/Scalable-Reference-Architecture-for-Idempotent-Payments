@@ -182,10 +182,16 @@ just its results.
 
 ## 7. Threats to validity
 
-- These are informal proof sketches appropriate to a systems paper, not
-  mechanized proofs (no TLA+/Coq model). The safety argument leans entirely
-  on the RDBMS's documented atomicity/uniqueness guarantee for a single
-  `INSERT`, which is a standard, well-established property, not something
+- The arguments above are prose proof sketches, written to be auditable
+  against the actual code. They are now cross-checked by a **machine-checked
+  TLA+ model** — see [`formal-proof.md`](formal-proof.md) and
+  [`tla/`](tla/) — which restates Safety/Liveness as explicit theorems and
+  verifies them by exhaustive state-space search (TLC finds the naive-protocol
+  violation and confirms its absence under the optimistic strategy across
+  every reachable state at up to 5 concurrent requesters). The safety
+  argument still leans on the RDBMS's documented atomicity/uniqueness
+  guarantee for a single `INSERT` as an axiom in both the prose and the TLA+
+  model — that guarantee is standard and well-established, not something
   this work re-derives.
 - The mock payment gateway (`payment-gateway.service.ts`) is not itself
   idempotent — a retried gateway call after a successful authorization would
