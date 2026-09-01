@@ -62,14 +62,21 @@ java -jar tla2tools.jar -config IdempotentPayment_Optimistic.cfg IdempotentPayme
 
 # Optimistic strategy, exhaustively re-checked at 5 concurrent requesters (3,157 states)
 java -jar tla2tools.jar -config IdempotentPayment_Optimistic_N5.cfg IdempotentPayment.tla
+
+# Payment lifecycle state machine (Sec3 invariants of payment-state-machine.md), MaxAmount=3 and 5
+java -jar tla2tools.jar -config PaymentStateMachine.cfg PaymentStateMachine.tla
+java -jar tla2tools.jar -config PaymentStateMachine_N5.cfg PaymentStateMachine.tla
 ```
 
-Recorded output from an actual run of all three is checked in at
-`tlc-output-naive.txt`, `tlc-output-optimistic.txt`, and
-`tlc-output-optimistic-n5.txt` in the same directory — the theorems in
-`research/formal-model/formal-proof.md` cite these transcripts directly, so
-re-running the commands above is a genuine independent verification, not a
-demonstration of something already taken on faith.
+Recorded output from an actual run of all five is checked in at
+`tlc-output-naive.txt`, `tlc-output-optimistic.txt`,
+`tlc-output-optimistic-n5.txt`, `tlc-output-payment-state-machine.txt`, and
+`tlc-output-payment-state-machine-n5.txt` in the same directory — the
+theorems in `research/formal-model/formal-proof.md` and the machine-checked
+section of `research/formal-model/payment-state-machine.md` cite these
+transcripts directly, so re-running the commands above is a genuine
+independent verification, not a demonstration of something already taken on
+faith.
 
 ## 5. Regenerate the benchmark results (`research/results/`)
 
@@ -139,6 +146,7 @@ View the resulting dashboard live at `http://localhost:3002` (admin/admin) → "
 | Orchestration/verification scripts                                  | `packages/backend/scripts/{run-all-benchmarks,verify-idempotency,fault-injection}.ts`                |
 | Raw results                                                         | `research/results/*.json`, `research/results/observability/*.json`, `research/results/scaled/*.json` |
 | Bibliography                                                        | `research/related-work.md`                                                                           |
+| Consolidated limitations / threats to validity                      | `research/limitations.md`                                                                            |
 
 ## Known deviations from a fully mechanical script-only pipeline
 

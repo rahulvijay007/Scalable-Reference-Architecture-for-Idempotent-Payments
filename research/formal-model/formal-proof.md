@@ -4,7 +4,7 @@ This document restates the argument in [`idempotency-protocol.md`](idempotency-p
 as explicit theorems and proofs, and cross-checks it against a **machine-checked**
 TLA+ model — [`tla/IdempotentPayment.tla`](tla/IdempotentPayment.tla) — verified with
 the TLC model checker (TLA+ Tools v2.19). This is intentionally in addition to,
-not a replacement for, the prose argument: the prose explains *why* in terms a
+not a replacement for, the prose argument: the prose explains _why_ in terms a
 systems reader can follow against the actual code; this document exists so a
 formal-methods reviewer has a precise, checkable artifact to evaluate instead
 of having to trust prose alone. Raw TLC transcripts are in
@@ -12,7 +12,12 @@ of having to trust prose alone. Raw TLC transcripts are in
 [`tla/tlc-output-optimistic.txt`](tla/tlc-output-optimistic.txt), and
 [`tla/tlc-output-optimistic-n5.txt`](tla/tlc-output-optimistic-n5.txt) —
 nothing below is asserted without a corresponding line in one of those files.
-Reproduction commands are in [`../REPRODUCE.md`](../REPRODUCE.md).
+Reproduction commands are in [`../REPRODUCE.md`](../REPRODUCE.md). The
+payment lifecycle's own two structural invariants (No-invalid-transition,
+Refund-sum) are machine-checked separately, in
+[`payment-state-machine.md` §5](payment-state-machine.md#5-machine-checked-verification-tla)
+via [`tla/PaymentStateMachine.tla`](tla/PaymentStateMachine.tla) — this
+document covers only the idempotency protocol specifically.
 
 ## 1. System model
 
@@ -29,7 +34,7 @@ against the shared database state `rowExists(K) : Bool`:
   constraint — it is not re-derived here, consistent with §7 of
   `idempotency-protocol.md`).
 - **handle-conflict** — executes only if `insert` failed; its behavior is
-  the one place the *Naive* and *Optimistic* strategies diverge.
+  the one place the _Naive_ and _Optimistic_ strategies diverge.
 
 Every requester's control flow is `read → (insert | reconcile-existing)`,
 and for those that reach a failed `insert`, `→ handle-conflict`. This is
@@ -41,10 +46,10 @@ that each action's comment cites the corresponding line(s) of
 
 ## 2. Properties
 
-**Definition (Safety).** A protocol execution is *safe* if at most one
+**Definition (Safety).** A protocol execution is _safe_ if at most one
 requester's `insert` ever succeeds for a given key `K`.
 
-**Definition (Liveness).** A protocol execution is *live* if every requester
+**Definition (Liveness).** A protocol execution is _live_ if every requester
 eventually reaches a terminal outcome in `{authorized, reconciled}` — i.e.,
 excludes `unhandledError` as a possible terminal outcome for any requester.
 
@@ -76,7 +81,7 @@ strategies. ∎
 **Machine check.** TLC verified `Safety` as an invariant — checked at every
 one of the 3,157 distinct states reachable with `|R| = 5` under the
 Optimistic strategy (`tlc-output-optimistic-n5.txt`), and at every state
-reachable with `|R| = 3` under both strategies. TLC performs *exhaustive*
+reachable with `|R| = 3` under both strategies. TLC performs _exhaustive_
 state-space exploration up to the modeled bound, not sampling — "no error
 has been found" for an invariant means the invariant provably holds across
 every one of those reachable states, not merely the ones a test run
@@ -102,7 +107,7 @@ of: `reconcile-existing` directly (outcome `reconciled`), a successful
 
 **Corollary (Naive strategy violates Liveness).** Under the Naive strategy,
 `HandleConflictNaive` unconditionally sets outcome to `unhandledError` with
-no further branch — so *any* reachable state in which two or more
+no further branch — so _any_ reachable state in which two or more
 requesters' `read` events both observe `rowExists(K) = false` before either
 completes its `insert` (i.e., a genuine race) leads to a requester
 terminating with `unhandledError`. Such a state is reachable whenever
@@ -129,10 +134,10 @@ interleaving exercised by the property-based test in
 Three independent lines of evidence now support the same conclusion, each
 catching a different class of error:
 
-1. **Prose proof** (`idempotency-protocol.md`) — explains *why*, tied
+1. **Prose proof** (`idempotency-protocol.md`) — explains _why_, tied
    directly to the real TypeScript/Prisma code and its actual error types
    (`P2002`, `23505`). Best for a reader auditing the implementation.
-2. **Machine-checked model** (this document) — proves the *abstraction* is
+2. **Machine-checked model** (this document) — proves the _abstraction_ is
    correct by exhaustive search over its full reachable state space, not
    sampled interleavings, and is immune to the kind of reasoning error a
    human proof-writer (or reviewer) can make by accident. Best for a formal
@@ -140,15 +145,15 @@ catching a different class of error:
    independently re-run by a third party with `java -jar tla2tools.jar` and
    no access to this codebase at all.
 3. **Property-based tests** (`payment.state-machine.pbt.test.ts`) and
-   **empirical benchmarks** (`research/results/`) — confirm the *real
-   system*, including everything the TLA+ model deliberately abstracts away
+   **empirical benchmarks** (`research/results/`) — confirm the _real
+   system_, including everything the TLA+ model deliberately abstracts away
    (the actual HTTP layer, the actual Prisma transaction, the actual
    gateway call, real network timing), exhibits the same behavior the model
    and proof predict. This is what caught the residual race described in
-   §6 of `idempotency-protocol.md` — a bug in the *implementation's fidelity
-   to the model*, not in the model or proof themselves, which is precisely
+   §6 of `idempotency-protocol.md` — a bug in the _implementation's fidelity
+   to the model_, not in the model or proof themselves, which is precisely
    the class of error neither the prose proof nor the TLA+ model (both of
-   which model the *intended* protocol) could have caught on their own.
+   which model the _intended_ protocol) could have caught on their own.
 
 None of the three is redundant with the others; each closes a gap the other
 two cannot.
@@ -161,7 +166,7 @@ two cannot.
   model does not itself verify that guarantee — it is taken as an axiom,
   exactly as the prose proof does.
 - The model does not include the Redis-lock strategy. Its liveness is
-  already stated as *conditional* (§4 of `idempotency-protocol.md`,
+  already stated as _conditional_ (§4 of `idempotency-protocol.md`,
   dependent on TTL-vs-critical-section-duration and Redis availability),
   which is not a property amenable to the same kind of unconditional
   exhaustive-search argument without modeling real-valued timing — doing so
